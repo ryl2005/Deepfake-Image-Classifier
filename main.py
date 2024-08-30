@@ -84,3 +84,5 @@ model.compile('adam',loss=tf.keras.losses.BinaryCrossentropy(), metrics=['accura
 
 early_stopping_cb = keras.callbacks.EarlyStopping(patience=5,restore_best_weights=True)
 history = model.fit(train,epochs=20,batch_size=32,validation_data=val,callbacks=[early_stopping_cb])
+
+model.save("modelo_detector_caras.keras")
