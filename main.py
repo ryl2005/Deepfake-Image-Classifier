@@ -11,7 +11,7 @@ from PIL import Image
 
 
 # Update the path to your local dataset directory
-path = "/Users/ryanlee/SPIS_Test-1/dataset"
+path = "/Users/ryanlee/SPIS_Test1/dataset"
 
 def get_from_dir(dir):
     dir_path = os.path.join(path, dir)
@@ -24,7 +24,7 @@ def get_from_dir(dir):
         color_mode="rgb",
         seed=42,
         batch_size=32,
-        image_size=(128, 128)
+        image_size=(32, 32) #Can make smaller to make run faster also need to change ln 61 input shape to same size
     )
 
 # Load the datasets
@@ -58,7 +58,7 @@ plt.show()
 
 model = models.Sequential()
 
-model.add(layers.Conv2D(32,(3,3),activation="relu", padding='same', input_shape=(128, 128, 3)))
+model.add(layers.Conv2D(32,(3,3),activation="relu", padding='same', input_shape=(32, 32, 3)))
 model.add(layers.Conv2D(32,(3,3),activation="relu", padding='same'))
 model.add(layers.MaxPooling2D((2,2), strides=(2, 2)))
 
