@@ -63,4 +63,7 @@ model.compile(optimizer=optimizer,loss=tf.keras.losses.BinaryCrossentropy(), met
 early_stopping_cb = keras.callbacks.EarlyStopping(patience=5,restore_best_weights=True)
 history = model.fit(train,epochs=20,batch_size=32,validation_data=val, callbacks=[early_stopping_cb])
 
-model.save("model.keras")
+model.evaluate(test)
+
+model.save("my_model.keras")
+#model.save('my_model.h5')
