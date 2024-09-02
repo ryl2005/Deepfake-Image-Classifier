@@ -24,7 +24,7 @@ def get_from_dir(dir):
         color_mode="rgb",
         seed=42,
         batch_size=32,
-        image_size=(32, 32) #Can make smaller to make run faster also need to change ln 61 input shape to same size
+        image_size=(64, 64) #Can make smaller to make run faster also need to change ln 61 input shape to same size
     )
 
 # Load the datasets
@@ -58,31 +58,34 @@ plt.show()
 
 model = models.Sequential()
 
-model.add(layers.Conv2D(32,(3,3),activation="relu", padding='same', input_shape=(32, 32, 3)))
-model.add(layers.Conv2D(32,(3,3),activation="relu", padding='same'))
-model.add(layers.MaxPooling2D((2,2), strides=(2, 2)))
-
-
-model.add(layers.Conv2D(64,(3,3),activation="relu", padding='same'))
+model.add(layers.Conv2D(64,(3,3),activation="relu", padding='same', input_shape=(64, 64, 3)))
 model.add(layers.Conv2D(64,(3,3),activation="relu", padding='same'))
 model.add(layers.MaxPooling2D((2,2), strides=(2, 2)))
 
 
 model.add(layers.Conv2D(128,(3,3),activation="relu", padding='same'))
 model.add(layers.Conv2D(128,(3,3),activation="relu", padding='same'))
+model.add(layers.MaxPooling2D((2,2), strides=(2, 2)))
+
+
+model.add(layers.Conv2D(256,(3,3),activation="relu", padding='same'))
+model.add(layers.Conv2D(256,(3,3),activation="relu", padding='same'))
 model.add(layers.MaxPooling2D((2,2), strides=(2, 2)))
 
 model.add(layers.Flatten())
-model.add(layers.Dropout(0.5))
-model.add(layers.Dense(128,activation="relu"))
+model.add(layers.Dropout(0.5))  
 model.add(layers.Dense(256,activation="relu"))
+model.add(layers.Dense(512,activation="relu")) 
 model.add(layers.Dense(1,activation="sigmoid"))
 
 model.summary()
 
-model.compile('adam',loss=tf.keras.losses.BinaryCrossentropy(), metrics=['accuracy'])
+optimizer = tf.keras.optimizers.Adam(0.0003)
+
+
+model.compile(optimizer=optimizer,loss=tf.keras.losses.BinaryCrossentropy(), metrics=['accuracy'])
 
 early_stopping_cb = keras.callbacks.EarlyStopping(patience=5,restore_best_weights=True)
-history = model.fit(train,epochs=20,batch_size=32,validation_data=val,callbacks=[early_stopping_cb])
+history = model.fit(train,epochs=20,batch_size=32,validation_data=val, callbacks=[early_stopping_cb])
 
 model.save("modelo_detector_caras.keras")
