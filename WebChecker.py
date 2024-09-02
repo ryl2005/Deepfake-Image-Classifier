@@ -1,7 +1,7 @@
 !pip install selenium
 !pip install webdriver_manager
 !pip install cloudscraper
-!pip install requests beautifulsoup4 lxml requests-cache
+pip install requests beautifulsoup4 lxml requests-cache
 import cloudscraper
 from bs4 import BeautifulSoup
 from itertools import cycle
