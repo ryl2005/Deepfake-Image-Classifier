@@ -11,7 +11,6 @@ from PIL import Image
 from data import *
 
 
-
 from matplotlib import pyplot as plt
 
 class_names = np.unique(train.class_names)
@@ -23,12 +22,10 @@ data = list(train.take(n_rows*n_cols))
 for row in range(n_rows):
     for col in range(n_cols):
         index = n_cols * row + col
-        # Obtener solo la primera imagen del lote
-        single_image = data[index][0][0]  # Tomar la primera imagen del primer lote
+        single_image = data[index][0][0]
         plt.subplot(n_rows, n_cols, index + 1)
-        plt.imshow(single_image.numpy().astype("uint8"),cmap="gray")  # Convertir a tipo uint8 para imshow
+        plt.imshow(single_image.numpy().astype("uint8"),cmap="gray")
         plt.axis('off')
-        # Convertir a un solo valor antes de usarlo para indexar class_names
         label_index = data[index][1][0]
         plt.title(class_names[label_index], fontsize=12)
 plt.subplots_adjust(wspace=0.2, hspace=0.5)
@@ -61,10 +58,9 @@ model.summary()
 
 optimizer = tf.keras.optimizers.Adam(0.0003)
 
-
 model.compile(optimizer=optimizer,loss=tf.keras.losses.BinaryCrossentropy(), metrics=['accuracy'])
 
 early_stopping_cb = keras.callbacks.EarlyStopping(patience=5,restore_best_weights=True)
 history = model.fit(train,epochs=20,batch_size=32,validation_data=val, callbacks=[early_stopping_cb])
 
-model.save("modelo_detector_caras.keras")
+model.save("model.keras")
