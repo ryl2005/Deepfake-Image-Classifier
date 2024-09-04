@@ -10,43 +10,86 @@ import os
 
 newModel = tf.keras.models.load_model('my_model.keras')
 
-X_test = []
-y_true = []
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
+# Assuming `test` is a DataLoader or iterable yielding (images, labels)
+true_labels = []
+predictions = []
+images_list = []
 
 for images, labels in test:
-    X_test.append(images.numpy())
-    y_true.append(labels.numpy())
+    true_labels.extend(labels.numpy())
+    batch_predictions = newModel.predict(images) >= 0.5
+    predictions.extend(batch_predictions.astype(int).flatten())
+    images_list.extend(images.numpy())
 
-X_test = np.concatenate(X_test, axis=0)
-y_true = np.concatenate(y_true, axis=0)
+true_labels = np.array(true_labels)
+predictions = np.array(predictions)
 
-y_pred = newModel.predict(X_test)
+# Confusion Matrix
+cm = confusion_matrix(true_labels, predictions)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+disp.plot()
+plt.show()
 
-def visualize_predictions(X, y_true, y_pred, max_images=20):
-    correct_indices = np.where(y_true == y_pred)[0]
-    incorrect_indices = np.where(y_true != y_pred)[0]
-    false_negative_indices = np.where((y_true == 0) & (y_pred == 1))[0]
+# Function to visualize all images and specific mismatches on the same plot
+def visualize_combinations(images, true_labels, predictions, num_images=9):
+    # Create a subplot grid with 3 rows: all images, true=0 & pred=1, and true=1 & pred=0
+    fig, axes = plt.subplots(3, num_images, figsize=(15, 15))
     
-    num_correct = min(len(correct_indices), 10)
-    num_incorrect = min(len(incorrect_indices), 10)
-    num_false_negatives = min(len(false_negative_indices), 10)
+    # Plot all images
+    indices_to_show = np.random.choice(len(images), min(num_images, len(images)), replace=False)
+    for i, idx in enumerate(indices_to_show):
+        ax = axes[0, i]
+        img = images[idx]
+        if img.max() > 1:
+            img = img / 255.0  # Normalize to [0, 1] if image values are [0, 255]
+        ax.imshow(img)
+        ax.axis('off')
+        ax.set_title(f'True: {true_labels[idx]}\nPred: {predictions[idx]}')
     
-    selected_correct_indices = correct_indices[:num_correct]
-    selected_incorrect_indices = incorrect_indices[:num_incorrect]
-    selected_false_negative_indices = false_negative_indices[:num_false_negatives]
-    
-    selected_indices = np.concatenate([selected_correct_indices, selected_incorrect_indices]) #selected_false_negative_indices
-    
-    fig, axes = plt.subplots(2, 10, figsize=(20, 10)) #Change to 3 to show false negatives
-    for i, ax in enumerate(axes.ravel()):
-        if i < len(selected_indices):
-            ax.imshow(X[selected_indices[i]].astype('uint8'))
-            ax.set_title(f"True: {y_true[selected_indices[i]]}\nPred: {y_pred[selected_indices[i]]}")
+    # Plot true=0 & pred=1 images
+    mismatched_indices_0_1 = [
+        i for i in range(len(true_labels)) 
+        if true_labels[i] == 0 and predictions[i] == 1
+    ]
+    num_images_mismatches_0_1 = min(num_images, len(mismatched_indices_0_1))
+    if num_images_mismatches_0_1 == 0:
+        print("No mismatched images where true=0 and pred=1 found.")
+    else:
+        for i in range(num_images_mismatches_0_1):
+            idx = mismatched_indices_0_1[i]
+            ax = axes[1, i]
+            img = images[idx]
+            if img.max() > 1:
+                img = img / 255.0  # Normalize to [0, 1] if image values are [0, 255]
+            ax.imshow(img)
             ax.axis('off')
-        else:
+            ax.set_title(f'True: {true_labels[idx]}\nPred: {predictions[idx]}')
+    
+    # Plot true=1 & pred=0 images
+    mismatched_indices_1_0 = [
+        i for i in range(len(true_labels)) 
+        if true_labels[i] == 1 and predictions[i] == 0
+    ]
+    num_images_mismatches_1_0 = min(num_images, len(mismatched_indices_1_0))
+    if num_images_mismatches_1_0 == 0:
+        print("No mismatched images where true=1 and pred=0 found.")
+    else:
+        for i in range(num_images_mismatches_1_0):
+            idx = mismatched_indices_1_0[i]
+            ax = axes[2, i]
+            img = images[idx]
+            if img.max() > 1:
+                img = img / 255.0  # Normalize to [0, 1] if image values are [0, 255]
+            ax.imshow(img)
             ax.axis('off')
+            ax.set_title(f'True: {true_labels[idx]}\nPred: {predictions[idx]}')
+    
     plt.tight_layout()
     plt.show()
 
-# Example usage
-visualize_predictions(X_test, y_true, y_pred.argmax(axis=1))
+# Visualize combinations of images
+visualize_combinations(images_list, true_labels, predictions, num_images=9)

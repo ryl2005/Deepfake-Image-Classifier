@@ -14,7 +14,7 @@ def get_from_dir(dir):
         color_mode="rgb",
         seed=42,
         batch_size=32,
-        image_size=(64, 64) #Can make smaller to make run faster also need to change ln 61 input shape to same size
+        image_size=(128, 128) #Can make smaller to make run faster also need to change ln 61 input shape to same size
     )
 
 # Load the datasets
